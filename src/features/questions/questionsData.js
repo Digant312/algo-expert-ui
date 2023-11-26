@@ -31,6 +31,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 const QuestionData = (props) => {
+  console.log("@QuestionData props.questionData", props.questionData.length);
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 700 }} aria-label="customized table">

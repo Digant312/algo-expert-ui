@@ -7,12 +7,61 @@ import { Link } from "react-router-dom";
 import QuestionData from "./questionsData";
 import MultipleSelectCheckmarks from "../../common/MultipleSelectCheckmarks";
 
-const Home = (props) => {
+const Home = () => {
   const [questionsList, setQuestionsList] = useState([]);
+  const [filterQuestionsList, setFilterQuestionsList] = useState([]);
+  const [difficultyLevel, setDifficultyLevel] = useState([]);
+  const [tag, setTag] = useState([]);
 
-  const [filterQuestionsList, setFilterQuestionsList] = useState(
-    props.questionsList
-  );
+  useEffect(() => {
+    console.log("filterQuestionsList ********", filterQuestionsList);
+  }, [filterQuestionsList]);
+
+  useEffect(() => {
+    getQuestionList();
+  }, []);
+
+  useEffect(() => {
+    let updatedQuestionsList = [];
+    console.log("UPDATED FILTERS: tag", tag);
+    console.log("UPDATED FILTERS: difficultyLevel", difficultyLevel);
+    questionsList.forEach((question) => {
+      if (difficultyLevel.length && tag.length) {
+        // both selected
+        if (
+          tag.includes(question.category) &&
+          difficultyLevel.includes(question.difficulty)
+        ) {
+          console.log("BOTH --->>>>");
+          updatedQuestionsList.push(question);
+        }
+      } else if (difficultyLevel.length === 0 && tag.length === 0) {
+        // none selected
+        console.log("NONE --->>>>");
+        updatedQuestionsList = questionsList;
+      } else {
+        // only one selected
+        console.log("ONE --->>>>");
+
+        if (tag.length > 0 && tag.includes(question.category)) {
+          console.log("TAG ONLY --->>>>", question.name, question.category);
+          updatedQuestionsList.push(question);
+        } else if (
+          difficultyLevel.length > 0 &&
+          difficultyLevel.includes(question.difficulty)
+        ) {
+          console.log("difficulty ONLY --->>>>");
+          updatedQuestionsList.push(question);
+        }
+      }
+    });
+    console.log("questionsList --->>>", questionsList);
+    console.log("questionsList --->>>", questionsList.length);
+    console.log("updatedQuestionsList --->>>", updatedQuestionsList.length);
+    console.log("updatedQuestionsList --->>>", updatedQuestionsList);
+    setFilterQuestionsList(updatedQuestionsList);
+  }, [tag, difficultyLevel, questionsList]);
+
   const getQuestionList = async () => {
     try {
       const response = await axios.get("http://localhost:3000/questions");
@@ -24,64 +73,6 @@ const Home = (props) => {
       console.log(error);
     }
   };
-  useEffect(() => {
-    getQuestionList();
-  }, []);
-
-  const [difficultyLevel, setDifficultyLevel] = useState([]);
-  const [tag, setTag] = useState([]);
-
-  useEffect(() => {
-    setFilterQuestionsList(props.questionsList);
-  }, [props.questionsList]);
-
-  useEffect(() => {
-    const updatedQuestionsList = [];
-    console.log("UPDATED FILTERS: tag", tag);
-    console.log("UPDATED FILTERS: difficultyLevel", difficultyLevel);
-    props.questionsList.forEach((question) => {
-      if (difficultyLevel.length && tag.length) {
-        // both selected
-        // alert("both selected.");
-        if (
-          tag.includes(question.category) &&
-          difficultyLevel.includes(question.difficulty)
-        ) {
-          console.log("BOTH --->>>>");
-          //   updatedQuestionsList.push(question);
-        }
-      } else if (difficultyLevel.length === 0 && tag.length === 0) {
-        // none selected
-        // alert("none selected.");
-
-        console.log("NONE --->>>>");
-
-        // updatedQuestionsList = props.questionsList;
-      } else {
-        // only one selected
-        console.log("ONE --->>>>");
-
-        if (tag.length > 0 && tag.includes(question.category)) {
-          console.log("TAG ONLY --->>>>", question.name, question.category);
-          updatedQuestionsList.push(question);
-        }
-        // else if (
-        //   difficultyLevel.length > 0 &&
-        //   difficultyLevel.includes(question.difficulty)
-        // ) {
-        // //   if (question.difficulty !== 1) {
-        // //     console.log("Que --->>>>", question);
-        // //     console.log("difficultyLevel --->>>>", difficultyLevel);
-        // //   }
-        //   console.log("difficulty ONLY --->>>>");
-        //   updatedQuestionsList.push(question);
-        // }
-      }
-    });
-    console.log("updatedQuestionsList --->>>", updatedQuestionsList.length);
-    console.log("updatedQuestionsList --->>>", updatedQuestionsList);
-    setFilterQuestionsList(updatedQuestionsList);
-  }, [tag, difficultyLevel]);
 
   const renderFilters = () => {
     const difficulties = [
