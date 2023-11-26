@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Container from '@mui/material/Container';
 import Grid from "@mui/material/Grid";
 import { Link } from "react-router-dom";
+import QuestionData from "./questionsData";
 
 const Home = (props) => {
     const [filterQuestionsList, setFilterQuestionsList] = useState(props.questionsList)
@@ -15,15 +16,7 @@ const Home = (props) => {
         <div>
             <Container>
                 <h1>This is Home Page</h1>
-                <Grid container spacing={2}>
-                    {filterQuestionsList && filterQuestionsList.map((item) => (
-                    <Grid item xs={12}>
-                        <div className="question-card">
-                            <Link to={`/questions/${item.uid}`}>{item.name}</Link>
-                        </div>
-                    </Grid>
-                    ))}
-                </Grid>
+                <QuestionData questionData={filterQuestionsList} />
             </Container>
         </div>
     )
