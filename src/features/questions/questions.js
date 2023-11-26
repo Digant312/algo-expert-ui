@@ -1,25 +1,139 @@
 import { useEffect, useState } from "react";
-import Container from '@mui/material/Container';
+import Container from "@mui/material/Container";
+import axios from "axios";
+
 import Grid from "@mui/material/Grid";
 import { Link } from "react-router-dom";
 import QuestionData from "./questionsData";
+import MultipleSelectCheckmarks from "../../common/MultipleSelectCheckmarks";
 
 const Home = (props) => {
-    const [filterQuestionsList, setFilterQuestionsList] = useState(props.questionsList)
+  const [questionsList, setQuestionsList] = useState([]);
 
-    useEffect(() => {
-        console.log(props.questionsList, 'props.questionsList');
-        setFilterQuestionsList(props.questionsList)
-    }, [props.questionsList])
+  const [filterQuestionsList, setFilterQuestionsList] = useState(
+    props.questionsList
+  );
+  const getQuestionList = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/questions");
+      console.log(response);
+      if (response.status === 200) {
+        setQuestionsList(response?.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    getQuestionList();
+  }, []);
+
+  const [difficultyLevel, setDifficultyLevel] = useState([]);
+  const [tag, setTag] = useState([]);
+
+  useEffect(() => {
+    setFilterQuestionsList(props.questionsList);
+  }, [props.questionsList]);
+
+  useEffect(() => {
+    const updatedQuestionsList = [];
+    console.log("UPDATED FILTERS: tag", tag);
+    console.log("UPDATED FILTERS: difficultyLevel", difficultyLevel);
+    props.questionsList.forEach((question) => {
+      if (difficultyLevel.length && tag.length) {
+        // both selected
+        // alert("both selected.");
+        if (
+          tag.includes(question.category) &&
+          difficultyLevel.includes(question.difficulty)
+        ) {
+          console.log("BOTH --->>>>");
+          //   updatedQuestionsList.push(question);
+        }
+      } else if (difficultyLevel.length === 0 && tag.length === 0) {
+        // none selected
+        // alert("none selected.");
+
+        console.log("NONE --->>>>");
+
+        // updatedQuestionsList = props.questionsList;
+      } else {
+        // only one selected
+        console.log("ONE --->>>>");
+
+        if (tag.length > 0 && tag.includes(question.category)) {
+          console.log("TAG ONLY --->>>>", question.name, question.category);
+          updatedQuestionsList.push(question);
+        }
+        // else if (
+        //   difficultyLevel.length > 0 &&
+        //   difficultyLevel.includes(question.difficulty)
+        // ) {
+        // //   if (question.difficulty !== 1) {
+        // //     console.log("Que --->>>>", question);
+        // //     console.log("difficultyLevel --->>>>", difficultyLevel);
+        // //   }
+        //   console.log("difficulty ONLY --->>>>");
+        //   updatedQuestionsList.push(question);
+        // }
+      }
+    });
+    console.log("updatedQuestionsList --->>>", updatedQuestionsList.length);
+    console.log("updatedQuestionsList --->>>", updatedQuestionsList);
+    setFilterQuestionsList(updatedQuestionsList);
+  }, [tag, difficultyLevel]);
+
+  const renderFilters = () => {
+    const difficulties = [
+      { label: "Easy", value: 1 },
+      { label: "Medium", value: 2 },
+      { label: "Hard", value: 3 },
+      { label: "Very Hard", value: 4 },
+    ];
+
+    const tags = [
+      { label: "Arrays", value: "Arrays" },
+      { label: "Binary Search Trees", value: "Binary Search Trees" },
+      { label: "Dynamic Programming", value: "Dynamic Programming" },
+      { label: "Famous Alogorithm", value: "Famous Alogorithm" },
+      { label: "Graphs", value: "Graphs" },
+      { label: "Greedy Algorithms", value: "Greedy Algorithms" },
+      { label: "Heaps", value: "Heaps" },
+      { label: "Linked Lists", value: "Linked Lists" },
+      { label: "Recursion", value: "Recursion" },
+      { label: "Searching", value: "Searching" },
+      { label: "Sorting", value: "Sorting" },
+      { label: "Stacks", value: "Stacks" },
+      { label: "Strings", value: "Strings" },
+      { label: "Tries", value: "Tries" },
+    ];
 
     return (
-        <div>
-            <Container>
-                <h1>This is Home Page</h1>
-                <QuestionData questionData={filterQuestionsList} />
-            </Container>
-        </div>
-    )
-}
+      <div style={{ display: "flex", margin: "20px auto 20px auto" }}>
+        <MultipleSelectCheckmarks
+          label="Difficulty"
+          options={difficulties}
+          value={difficultyLevel}
+          handleChange={setDifficultyLevel}
+        />
+        <MultipleSelectCheckmarks
+          label="Tags"
+          options={tags}
+          value={tag}
+          handleChange={setTag}
+        />
+      </div>
+    );
+  };
 
-export default Home
+  return (
+    <div>
+      <Container>
+        {renderFilters()}
+        <QuestionData questionData={filterQuestionsList} />
+      </Container>
+    </div>
+  );
+};
+
+export default Home;
